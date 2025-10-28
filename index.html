@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Literary Compass - Find Your Next Read</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Configure Tailwind to use the "Inter" font and define the custom theme -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#1A1A2E', // Deep Charcoal
+                        'secondary': '#2C3E50', // Dark Slate Blue
+                        'accent': '#FFC107', // Rich Gold
+                        'text-light': '#F0F0F0', // Creamy White
+                        'text-dark': '#1A1A2E',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Base styles for a subtle background texture and scroll behavior */
+        body {
+            background-color: #1A1A2E;
+            color: #F0F0F0;
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        /* Custom scrollbar for aesthetics (optional, but enhances theme) */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: #34495e; border-radius: 4px; }
+        ::-webkit-scrollbar-track { background: #1A1A2E; }
+
+        /* Animation for page transitions (simulated fade) */
+        .page-content {
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .page-content.active {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen antialiased">
+
+    <!-- Inline SVG Icons (Lucide-style) -->
+    <script>
+        const getIcon = (name, className = "w-5 h-5") => {
+            const icons = {
+                home: `<svg xmlns="http://www.w3.org/2000/svg" class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>`,
+                compass: `<svg xmlns="http://www.w3.org/2000/svg" class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>`,
+                info: `<svg xmlns="http://www.w3.org/2000/svg" class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>`,
+                user: `<svg xmlns="http://www.w3.org/2000/svg" class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`,
+                book: `<svg xmlns="http://www.w3.org/2000/svg" class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2"/></svg>`,
+            };
+            return icons[name] || '';
+        };
+    </script>
+
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-50 bg-primary/95 backdrop-blur-sm shadow-xl border-b border-secondary">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo/Title -->
+                <a href="#home" onclick="navigate('home')" class="flex items-center space-x-2 text-xl font-bold text-accent hover:text-white transition duration-200">
+                    <span class="text-3xl" style="line-height: 1;">&#x270E;</span> <!-- Quill Icon -->
+                    <span>The Literary Compass</span>
+                </a>
+
+                <!-- Desktop Navigation Links -->
+                <nav class="hidden md:flex space-x-8">
+                    <button onclick="navigate('home')" class="nav-link flex items-center space-x-2 text-text-light hover:text-accent transition duration-200" data-page="home">
+                        <span class="icon" data-icon="home"></span>
+                        <span>Home</span>
+                    </button>
+                    <button onclick="navigate('recommend')" class="nav-link flex items-center space-x-2 text-text-light hover:text-accent transition duration-200" data-page="recommend">
+                        <span class="icon" data-icon="compass"></span>
+                        <span>Get Recommendations</span>
+                    </button>
+                    <button onclick="navigate('about')" class="nav-link flex items-center space-x-2 text-text-light hover:text-accent transition duration-200" data-page="about">
+                        <span class="icon" data-icon="info"></span>
+                        <span>About Us</span>
+                    </button>
+                    <button onclick="navigate('signin')" class="nav-link flex items-center space-x-2 text-text-light hover:text-accent transition duration-200" data-page="signin">
+                        <span class="icon" data-icon="user"></span>
+                        <span>Sign In</span>
+                    </button>
+                </nav>
+
+                <!-- Mobile Menu Button (Hamburger) -->
+                <button id="mobile-menu-button" class="md:hidden text-text-light hover:text-accent transition duration-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-primary shadow-lg border-t border-secondary">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <button onclick="navigate('home')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-text-light hover:bg-secondary/50 hover:text-accent">Home</button>
+                <button onclick="navigate('recommend')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-text-light hover:bg-secondary/50 hover:text-accent">Get Recommendations</button>
+                <button onclick="navigate('about')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-text-light hover:bg-secondary/50 hover:text-accent">About Us</button>
+                <button onclick="navigate('signin')" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-text-light hover:bg-secondary/50 hover:text-accent">Sign In</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- 1. Home Page Section -->
+        <section id="home" class="page-content active min-h-[calc(100vh-64px)] flex items-center justify-center">
+            <div class="text-center py-20 bg-secondary/30 rounded-3xl p-8 md:p-16 shadow-2xl backdrop-blur-sm border border-secondary/50">
+                <div class="relative inline-block mb-6">
+                    <h1 class="text-6xl md:text-8xl font-extrabold text-white leading-none tracking-tight" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.5);">
+                        Find Your Next Great Read.
+                    </h1>
+                    <div class="absolute inset-0 bg-accent opacity-20 filter blur-lg rounded-full -z-10"></div>
+                </div>
+
+                <p class="mt-4 text-xl md:text-2xl text-text-light max-w-3xl mx-auto">
+                    Curated recommendations built just for literary adventurers, connecting you with stories that matter.
+                </p>
+
+                <button onclick="navigate('recommend')" class="mt-10 inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-semibold rounded-xl text-text-dark bg-accent hover:bg-accent/80 shadow-2xl shadow-accent/40 transform hover:scale-105 transition duration-300 ease-in-out">
+                    <span class="icon" data-icon="compass" data-class="w-6 h-6 mr-3"></span>
+                    Start Exploring Now
+                </button>
+            </div>
+        </section>
+
+        <!-- 2. Recommendation System Section -->
+        <section id="recommend" class="page-content hidden pt-8">
+            <h2 class="text-4xl font-bold text-center mb-12 text-accent">The Literary Compass Navigator</h2>
+
+            <!-- Genre Selection -->
+            <div id="genre-selection" class="max-w-4xl mx-auto bg-secondary p-8 rounded-xl shadow-2xl border border-secondary/50">
+                <h3 class="text-2xl font-semibold mb-6 text-text-light border-b border-accent/50 pb-3">Step 1: Select Exactly 3 Genres</h3>
+                <p id="selection-status" class="mb-6 text-lg font-medium text-accent">Selected: 0/3</p>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+                    <!-- Genre Cards -->
+                    <div class="genre-card" data-genre="Fantasy">
+                        <div class="p-4 rounded-xl border-2 border-primary hover:border-accent/50 transition duration-200 cursor-pointer text-center bg-primary/70 shadow-lg transform hover:scale-[1.02]">
+                            <span class="text-4xl block mb-2">✨</span>
+                            <span class="text-lg font-semibold">Fantasy</span>
+                        </div>
+                    </div>
+                    <div class="genre-card" data-genre="Thriller">
+                        <div class="p-4 rounded-xl border-2 border-primary hover:border-accent/50 transition duration-200 cursor-pointer text-center bg-primary/70 shadow-lg transform hover:scale-[1.02]">
+                            <span class="text-4xl block mb-2">🔪</span>
+                            <span class="text-lg font-semibold">Thriller</span>
+                        </div>
+                    </div>
+                    <div class="genre-card" data-genre="Sci-Fi">
+                        <div class="p-4 rounded-xl border-2 border-primary hover:border-accent/50 transition duration-200 cursor-pointer text-center bg-primary/70 shadow-lg transform hover:scale-[1.02]">
+                            <span class="text-4xl block mb-2">🚀</span>
+                            <span class="text-lg font-semibold">Sci-Fi</span>
+                        </div>
+                    </div>
+                    <div class="genre-card" data-genre="History">
+                        <div class="p-4 rounded-xl border-2 border-primary hover:border-accent/50 transition duration-200 cursor-pointer text-center bg-primary/70 shadow-lg transform hover:scale-[1.02]">
+                            <span class="text-4xl block mb-2">📜</span>
+                            <span class="text-lg font-semibold">History</span>
+                        </div>
+                    </div>
+                    <div class="genre-card" data-genre="Biography">
+                        <div class="p-4 rounded-xl border-2 border-primary hover:border-accent/50 transition duration-200 cursor-pointer text-center bg-primary/70 shadow-lg transform hover:scale-[1.02]">
+                            <span class="text-4xl block mb-2">👤</span>
+                            <span class="text-lg font-semibold">Biography</span>
+                        </div>
+                    </div>
+                    <div class="genre-card" data-genre="Romance">
+                        <div class="p-4 rounded-xl border-2 border-primary hover:border-accent/50 transition duration-200 cursor-pointer text-center bg-primary/70 shadow-lg transform hover:scale-[1.02]">
+                            <span class="text-4xl block mb-2">💖</span>
+                            <span class="text-lg font-semibold">Romance</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="get-recommendations-btn" onclick="showRecommendations()" class="mt-8 w-full px-6 py-3 text-lg font-semibold rounded-xl text-text-dark bg-gray-500 opacity-50 cursor-not-allowed transition duration-300" disabled>
+                    Get My Books
+                </button>
+            </div>
+
+            <!-- Recommendation Results -->
+            <div id="recommendation-results" class="mt-16 hidden">
+                <h3 class="text-3xl font-bold mb-8 text-center text-text-light">Your Curated Reading List</h3>
+                <div id="book-list" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Book Cards will be inserted here by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. About Us Section -->
+        <section id="about" class="page-content hidden pt-8">
+            <div class="max-w-4xl mx-auto bg-secondary p-10 rounded-xl shadow-2xl border border-secondary/50">
+                <h2 class="text-4xl font-bold text-accent mb-6 text-center">Our Mission</h2>
+
+                <div class="md:flex md:space-x-8">
+                    <div class="md:w-1/2">
+                        <p class="mb-4 text-lg leading-relaxed">
+                            The Literary Compass was founded on a simple belief: the right book can change your life. We exist to cut through the noise of endless lists and provide focused, high-quality recommendations based on what genuinely excites you. Our system prioritizes literary depth and reader connection over simple algorithms.
+                        </p>
+                        <p class="mb-4 text-lg leading-relaxed">
+                            We are a collective of passionate readers, reviewers, and dreamers dedicated to the written word. We believe in the power of a quiet corner, a warm drink, and a story that transports you to another world.
+                        </p>
+                    </div>
+                    <div class="md:w-1/2 mt-6 md:mt-0 text-center flex flex-col justify-center items-center">
+                        <span class="icon" data-icon="book" data-class="w-20 h-20 text-accent mb-4"></span>
+                        <div class="text-2xl font-bold text-text-light">
+                            "Connecting Readers, One Great Story at a Time."
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Sign In Section -->
+        <section id="signin" class="page-content hidden pt-8 min-h-[calc(100vh-100px)] flex items-center justify-center">
+            <div class="w-full max-w-md bg-secondary p-8 md:p-10 rounded-xl shadow-2xl border border-accent/20">
+                <h2 class="text-3xl font-bold text-center mb-8 text-accent">Account Login</h2>
+
+                <form onsubmit="handleSignIn(event)">
+                    <div class="mb-6">
+                        <label for="email" class="block text-sm font-medium text-text-light mb-2">Email Address</label>
+                        <input type="email" id="email" name="email" class="w-full px-4 py-3 bg-primary border border-secondary rounded-lg focus:ring-accent focus:border-accent outline-none text-text-light transition duration-200" placeholder="your.name@example.com" required>
+                    </div>
+                    <div class="mb-6">
+                        <label for="password" class="block text-sm font-medium text-text-light mb-2">Password</label>
+                        <input type="password" id="password" name="password" class="w-full px-4 py-3 bg-primary border border-secondary rounded-lg focus:ring-accent focus:border-accent outline-none text-text-light transition duration-200" placeholder="••••••••" required>
+                    </div>
+
+                    <button type="submit" class="w-full flex justify-center items-center px-4 py-3 border border-transparent text-base font-semibold rounded-lg text-primary bg-accent hover:bg-accent/90 shadow-lg transform hover:scale-[1.01] transition duration-300">
+                        Sign In
+                    </button>
+
+                    <p class="mt-4 text-center text-sm">
+                        <a href="#" class="text-accent hover:underline transition duration-200">Forgot Password?</a>
+                    </p>
+                </form>
+            </div>
+
+            <!-- Toast Notification Container -->
+            <div id="toast-container" class="fixed bottom-5 right-5 z-[100] space-y-2"></div>
+        </section>
+
+    </main>
+
+    <footer class="bg-secondary/50 border-t border-secondary mt-16 py-6 text-center text-sm text-text-light/70">
+        <p>&copy; 2024 The Literary Compass. Designed for book lovers everywhere.</p>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- Navigation Logic ---
+        let currentPage = 'home';
+        const pages = ['home', 'recommend', 'about', 'signin'];
+
+        function navigate(targetPage) {
+            if (currentPage === targetPage) return;
+
+            const currentElement = document.getElementById(currentPage);
+            const targetElement = document.getElementById(targetPage);
+
+            if (currentElement) {
+                currentElement.classList.remove('active');
+                // Use a short timeout to allow the fade-out to begin before hiding
+                setTimeout(() => {
+                    currentElement.classList.add('hidden');
+                }, 400); // Must be slightly less than CSS transition time
+            }
+
+            if (targetElement) {
+                targetElement.classList.remove('hidden');
+                // Timeout to ensure the element is visible before adding 'active' for fade-in
+                setTimeout(() => {
+                    targetElement.classList.add('active');
+                }, 10);
+            }
+
+            currentPage = targetPage;
+
+            // Close mobile menu if open
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenu && !mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.add('hidden');
+            }
+
+            // Update URL hash for simple back/forward support
+            history.pushState(null, '', `#${targetPage}`);
+        }
+
+        // Handle URL hash on load
+        window.addEventListener('load', () => {
+            const hash = window.location.hash.replace('#', '');
+            if (pages.includes(hash)) {
+                currentPage = 'home'; // Reset current page before navigating
+                navigate(hash);
+            } else {
+                // Ensure the home page is correctly initialized
+                document.getElementById('home').classList.add('active');
+            }
+        });
+
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', () => {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        });
+
+        // --- Recommendation System Logic ---
+        let selectedGenres = [];
+        const maxSelections = 3;
+        const genreCards = document.querySelectorAll('.genre-card');
+        const selectionStatus = document.getElementById('selection-status');
+        const recommendBtn = document.getElementById('get-recommendations-btn');
+        const recommendationResultsDiv = document.getElementById('recommendation-results');
+        const bookListDiv = document.getElementById('book-list');
+
+        genreCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const genre = card.dataset.genre;
+                const innerDiv = card.querySelector('div');
+
+                if (selectedGenres.includes(genre)) {
+                    // Deselect
+                    selectedGenres = selectedGenres.filter(g => g !== genre);
+                    innerDiv.classList.remove('border-accent');
+                    innerDiv.classList.add('border-primary');
+                } else if (selectedGenres.length < maxSelections) {
+                    // Select
+                    selectedGenres.push(genre);
+                    innerDiv.classList.remove('border-primary');
+                    innerDiv.classList.add('border-accent');
+                } else {
+                    // Max selected
+                    createToast('Maximum selections reached (3 genres).', 'error');
+                }
+                
+                updateSelectionUI();
+            });
+        });
+
+        function updateSelectionUI() {
+            selectionStatus.textContent = `Selected: ${selectedGenres.length}/${maxSelections}`;
+            if (selectedGenres.length === maxSelections) {
+                recommendBtn.disabled = false;
+                recommendBtn.classList.remove('bg-gray-500', 'opacity-50', 'cursor-not-allowed');
+                recommendBtn.classList.add('bg-accent', 'text-text-dark', 'hover:bg-accent/90');
+            } else {
+                recommendBtn.disabled = true;
+                recommendBtn.classList.remove('bg-accent', 'text-text-dark', 'hover:bg-accent/90');
+                recommendBtn.classList.add('bg-gray-500', 'opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        function showRecommendations() {
+            recommendationResultsDiv.classList.remove('hidden');
+            bookListDiv.innerHTML = ''; // Clear previous results
+
+            // Static Data Logic: Returns a predefined list based on selected genres
+            const recommendations = getStaticRecommendations(selectedGenres);
+
+            recommendations.forEach(book => {
+                const bookCard = document.createElement('div');
+                bookCard.className = 'flex flex-col sm:flex-row bg-secondary p-5 rounded-xl shadow-xl border border-secondary/50 transform hover:translate-y-[-2px] transition duration-300';
+                
+                bookCard.innerHTML = `
+                    <img src="${book.image}" onerror="this.onerror=null;this.src='https://placehold.co/100x150/1A1A2E/F0F0F0?text=Cover';" class="w-full sm:w-28 h-auto sm:h-40 rounded-lg object-cover mb-4 sm:mb-0 sm:mr-6 shadow-lg border border-primary/50" alt="Book Cover">
+                    <div class="flex-grow">
+                        <h4 class="text-xl font-bold text-accent">${book.title}</h4>
+                        <p class="text-sm text-text-light/70 mb-3">by ${book.author}</p>
+                        <p class="text-text-light leading-relaxed">${book.summary}</p>
+                        <div class="mt-4 text-sm text-text-light/50">
+                            <span class="font-medium">Genres:</span> ${book.genres.join(', ')}
+                        </div>
+                    </div>
+                `;
+                bookListDiv.appendChild(bookCard);
+            });
+        }
+
+        function getStaticRecommendations(genres) {
+            // Priority Check (Fantasy > Thriller/Sci-Fi > General)
+            const isFantasy = genres.includes('Fantasy');
+            const isThriller = genres.includes('Thriller');
+            const isSciFi = genres.includes('Sci-Fi');
+            
+            let allBooks = [
+                {
+                    title: "The Silent Watcher",
+                    author: "Anya Sharma",
+                    summary: "A psychological thriller that follows a retired detective drawn into a decades-old cold case by a cryptic letter and a forgotten family secret.",
+                    genres: ["Thriller", "Mystery"],
+                    image: "https://placehold.co/100x150/503e4e/F0F0F0?text=Silent+Watcher"
+                },
+                {
+                    title: "Echoes of the Void",
+                    author: "Kaelen Vance",
+                    summary: "In a distant future where humanity is scattered across gas giants, a lone engineer discovers an ancient alien signal that changes everything.",
+                    genres: ["Sci-Fi", "Adventure"],
+                    image: "https://placehold.co/100x150/2E5A88/F0F0F0?text=Echoes+Void"
+                },
+                {
+                    title: "The Empress's Blade",
+                    author: "Elara Moon",
+                    summary: "A sweeping epic fantasy about a dishonored knight who must reclaim a magical sword to save a fragile kingdom from eternal winter.",
+                    genres: ["Fantasy", "Action", "Epic"],
+                    image: "https://placehold.co/100x150/800080/F0F0F0?text=Empress+Blade"
+                },
+                {
+                    title: "Tides of the Revolution",
+                    author: "Dr. L. Chen",
+                    summary: "A meticulously researched non-fiction account detailing the economic forces and key personalities behind the pivotal 18th-century European uprisings.",
+                    genres: ["History", "Non-Fiction"],
+                    image: "https://placehold.co/100x150/6A8D73/F0F0F0?text=Tides+History"
+                },
+                {
+                    title: "Becoming Jane Doe",
+                    author: "Mia Cortez",
+                    summary: "The candid memoir of a successful artist who must confront her past after a catastrophic accident leaves her without any memory of her adult life.",
+                    genres: ["Biography", "Memoir"],
+                    image: "https://placehold.co/100x150/B85D6F/F0F0F0?text=Becoming+Jane"
+                },
+                {
+                    title: "A Constellation of Moments",
+                    author: "Ethan Dale",
+                    summary: "A charming, contemporary romance about two aspiring astronomers who keep crossing paths at the worst possible times until a meteor shower changes their fate.",
+                    genres: ["Romance", "Contemporary"],
+                    image: "https://placehold.co/100x150/DDA0DD/F0F0F0?text=Constellation"
+                },
+                {
+                    title: "Chronicles of Aethel",
+                    author: "R. A. Hobb",
+                    summary: "The first volume in a classic high-fantasy series featuring dragons, ancient curses, and a young farmhand destined to become a powerful mage.",
+                    genres: ["Fantasy", "Magic"],
+                    image: "https://placehold.co/100x150/4B0082/F0F0F0?text=Aethel+Chron"
+                },
+                {
+                    title: "The Neural Shadow",
+                    author: "Dr. Sato",
+                    summary: "A near-future thriller where a programmer must race against time to stop an AI that has learned how to delete human memories through connected implants.",
+                    genres: ["Sci-Fi", "Thriller"],
+                    image: "https://placehold.co/100x150/008080/F0F0F0?text=Neural+Shadow"
+                }
+            ];
+
+            // Simple static logic: Filter books where at least one selected genre matches the book's genre
+            let filteredBooks = allBooks.filter(book => 
+                book.genres.some(genre => genres.includes(genre))
+            );
+
+            // If filtering yields less than 5, fill with top general picks
+            if (filteredBooks.length < 5) {
+                const generalPicks = allBooks.filter(book => !filteredBooks.includes(book));
+                filteredBooks = [...filteredBooks, ...generalPicks].slice(0, 5);
+            }
+            
+            // Randomly shuffle and take the first 5
+            filteredBooks.sort(() => 0.5 - Math.random());
+            return filteredBooks.slice(0, 5);
+        }
+
+        // --- Sign In Logic (Cosmetic) ---
+
+        function handleSignIn(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Log to console instead of external API call
+            console.log(`[SIGN IN ATTEMPT] Email: ${email}, Password length: ${password.length}`);
+            
+            createToast(`Welcome back, ${email}! (Sign in simulated).`, 'success');
+
+            // Optionally clear the form
+            document.getElementById('email').value = '';
+            document.getElementById('password').value = '';
+        }
+
+        // --- Toast/Modal Functionality (No alert()) ---
+
+        function createToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            let bgColor = 'bg-blue-600';
+            let icon = 'ℹ️';
+
+            if (type === 'success') {
+                bgColor = 'bg-green-600';
+                icon = '✅';
+            } else if (type === 'error') {
+                bgColor = 'bg-red-600';
+                icon = '🚨';
+            }
+
+            toast.className = `p-4 rounded-lg shadow-xl text-white ${bgColor} transform transition-all duration-300 translate-x-full opacity-0 flex items-center space-x-3`;
+            toast.innerHTML = `<span class="text-xl">${icon}</span><p>${message}</p>`;
+
+            container.appendChild(toast);
+
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full', 'opacity-0');
+                toast.classList.add('translate-x-0', 'opacity-100');
+            }, 10);
+
+            // Animate out and remove
+            setTimeout(() => {
+                toast.classList.remove('translate-x-0', 'opacity-100');
+                toast.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 5000); // Display for 5 seconds
+        }
+
+    </script>
+    <script>
+        // Inject SVG icons into elements with class 'icon' using data attributes.
+        (function injectIcons(){
+            // getIcon is defined earlier; map over placeholders
+            const iconEls = document.querySelectorAll('.icon');
+            iconEls.forEach(el => {
+                const name = el.dataset.icon;
+                const extraClass = el.dataset.class || '';
+                // Call getIcon and replace the default class if extraClass provided
+                let svg = getIcon(name, extraClass || undefined);
+                // If an extra class was provided and getIcon returned with a class attribute, replace it
+                if (extraClass && svg) {
+                    // Simple replacement: replace the first class="..." occurrence
+                    svg = svg.replace(/class="[^"]*"/, `class="${extraClass}"`);
+                }
+                el.innerHTML = svg || '';
+            });
+        })();
+    </script>
+</body>
+</html>
